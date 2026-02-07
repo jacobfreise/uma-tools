@@ -1096,6 +1096,8 @@ body {
 	border-right: 1px solid hsl(210 10% 85%);
 	min-height: 0;
 	align-self: stretch;
+	transition: width 0.3s ease;
+	overflow: visible !important;
 }
 
 #umaPane > div {
@@ -1735,3 +1737,46 @@ body {
 }
 
 body { background: var(--bg); color: var(--fg); }
+
+/* When collapsed, we hide the original children but NOT the button */
+#umaPane.collapsed {
+	width: 0 !important;
+	min-width: 0 !important;
+	flex-basis: 0 !important;
+	border: none !important;
+	margin: 0 !important;
+}
+
+/* This targets the original horse containers without needing a new wrapper */
+#umaPane.collapsed > div {
+	display: none !important;
+}
+
+/* The Button */
+.pane-collapse-toggle {
+	position: absolute;
+	/* Move it outside the right border */
+	right: -25px;
+	top: 50px;
+	width: 25px;
+	height: 50px;
+	background: #2a77c5;
+	color: white;
+	border: 1px solid #1a5ea8;
+	border-radius: 0 5px 5px 0;
+	cursor: pointer;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+
+/* Fix for the results area expansion */
+#mainContent {
+	display: flex;
+}
+
+#resultsPaneWrapper {
+	flex-grow: 1;
+}

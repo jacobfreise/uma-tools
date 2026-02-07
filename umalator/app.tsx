@@ -1440,6 +1440,7 @@ function App(props) {
 		if (stored) return stored === 'dark';
 		return window.matchMedia('(prefers-color-scheme: dark)').matches;
 	});
+	const [isUmaPaneCollapsed, setIsUmaPaneCollapsed] = useState(false);
 
 	useEffect(() => {
 		document.documentElement.classList.toggle('dark', darkMode);
@@ -2623,30 +2624,48 @@ function App(props) {
 				{resultsPane}
 				</div>
 				{expanded && <div id="umaPane" />}
-				{leftPanel === 'uma' && <div id={expanded ? 'umaOverlay' : 'umaPane'}>
-					<div class={!expanded && currentIdx == 0 ? 'selected' : ''}>
-						<HorseDef key={uma1.outfitId} state={uma1} setState={setUma1} courseDistance={course.distance} tabstart={() => 4} onResetAll={resetAllUmas} runData={mode == Mode.Compare ? runData : null} umaIndex={mode == Mode.Compare ? 0 : null}>
-							{expanded ? 'Uma 1' : umaTabs}
-						</HorseDef>
-					</div>
-					{expanded &&
-						<div id="copyUmaButtons">
-							<div id="copyUmaToRight" title="Copy uma 1 to uma 2" onClick={copyUmaToRight} />
-							<div id="copyUmaToLeft" title="Copy uma 2 to uma 1" onClick={copyUmaToLeft} />
-							<div id="swapUmas" title="Swap umas" onClick={swapUmas}>⮂</div>
+				{leftPanel === 'uma' && (
+					<div
+						id={expanded ? 'umaOverlay' : 'umaPane'}
+						className={isUmaPaneCollapsed && !expanded ? 'collapsed' : ''}
+					>
+						{/* Button is a direct child, just like the other divs */}
+						{!expanded && (
+							<button
+								className="pane-collapse-toggle"
+								onClick={(e) => {
+									e.stopPropagation();
+									setIsUmaPaneCollapsed(!isUmaPaneCollapsed);
+								}}
+							>
+								{isUmaPaneCollapsed ? '▶' : '◀'}
+							</button>
+						)}
+
+						<div class={!expanded && currentIdx == 0 ? 'selected' : ''}>
+							<HorseDef key={uma1.outfitId} state={uma1} setState={setUma1} courseDistance={course.distance} tabstart={() => 4} onResetAll={resetAllUmas} runData={mode == Mode.Compare ? runData : null} umaIndex={mode == Mode.Compare ? 0 : null}>
+								{expanded ? 'Uma 1' : umaTabs}
+							</HorseDef>
+						</div>
+						{expanded &&
+							<div id="copyUmaButtons">
+								<div id="copyUmaToRight" title="Copy uma 1 to uma 2" onClick={copyUmaToRight} />
+								<div id="copyUmaToLeft" title="Copy uma 2 to uma 1" onClick={copyUmaToLeft} />
+								<div id="swapUmas" title="Swap umas" onClick={swapUmas}>⮂</div>
+							</div>}
+						{mode == Mode.Compare && <div class={!expanded && currentIdx == 1 ? 'selected' : ''}>
+							<HorseDef key={uma2.outfitId} state={uma2} setState={setUma2} courseDistance={course.distance} tabstart={() => 4 + horseDefTabs()} onResetAll={resetAllUmas} runData={runData} umaIndex={1}>
+								{expanded ? 'Uma 2' : umaTabs}
+							</HorseDef>
 						</div>}
-					{mode == Mode.Compare && <div class={!expanded && currentIdx == 1 ? 'selected' : ''}>
-						<HorseDef key={uma2.outfitId} state={uma2} setState={setUma2} courseDistance={course.distance} tabstart={() => 4 + horseDefTabs()} onResetAll={resetAllUmas} runData={runData} umaIndex={1}>
-							{expanded ? 'Uma 2' : umaTabs}
-						</HorseDef>
-					</div>}
-					{posKeepMode == PosKeepMode.Virtual && mode == Mode.Compare && <div class={!expanded && currentIdx == 2 ? 'selected' : ''}>
-						<HorseDef key={pacer.outfitId} state={pacer} setState={setPacer} courseDistance={course.distance} tabstart={() => 4 + (mode == Mode.Compare ? 2 : 1) * horseDefTabs()} onResetAll={resetAllUmas}>
-							{expanded ? 'Pacemaker' : umaTabs}
-						</HorseDef>
-					</div>}
-					{expanded && <div id="closeUmaOverlay" title="Close panel" onClick={toggleExpand}>✕</div>}
-				</div>}
+						{posKeepMode == PosKeepMode.Virtual && mode == Mode.Compare && <div class={!expanded && currentIdx == 2 ? 'selected' : ''}>
+							<HorseDef key={pacer.outfitId} state={pacer} setState={setPacer} courseDistance={course.distance} tabstart={() => 4 + (mode == Mode.Compare ? 2 : 1) * horseDefTabs()} onResetAll={resetAllUmas}>
+								{expanded ? 'Pacemaker' : umaTabs}
+							</HorseDef>
+						</div>}
+						{expanded && <div id="closeUmaOverlay" title="Close panel" onClick={toggleExpand}>✕</div>}
+					</div>
+				)}
 				{leftPanel === 'settings' && <div id="settingsPane">
 					<h3>Settings</h3>
 					{mode == Mode.Compare && (

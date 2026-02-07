@@ -17,7 +17,9 @@ const serve = port != null;
 const debug = !!options.debug;
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.join(dirname, '..', '..');
+// const root = path.join(dirname, '..');
+const root = dirname;
+const projectRoot = path.join(dirname, '..');
 
 const redirectData = {
 	name: 'redirectData',
@@ -130,6 +132,23 @@ function runServer(ctx, port) {
 	let workerState = 0;
 	http.createServer(async (req, res) => {
 		const url = req.url.endsWith('/') ? req.url + 'index.html' : req.url;
+
+		if (url.startsWith('/uma-tools/')) {
+			const relativePath = url.replace(/^\/uma-tools/, ''); // Remove the prefix
+			const fp = path.join(projectRoot, relativePath);      // Look in project root
+
+			try {
+				await fs.promises.access(fp); // Check if file exists
+				console.log(`GET ${req.url} 200 OK (External Asset)`);
+				res.writeHead(200, {'Content-type': MIME_TYPES[path.extname(fp)] || 'application/octet-stream'});
+				fs.createReadStream(fp).pipe(res);
+				return; // Stop here, we served the file
+			} catch (e) {
+				// If not found, let it fall through or log it
+				console.log(`GET ${req.url} 404 Not Found (Asset missing at ${fp})`);
+			}
+		}
+
 		const filename = path.basename(url);
 		if (ARTIFACTS.indexOf(filename) > -1) {
 			const requestN = requestCount.get(filename) + (filename == 'simulator.worker.js' ? (workerState = +!workerState) : 1);
